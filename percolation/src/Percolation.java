@@ -58,7 +58,7 @@ public class Percolation {
         StdOut.println(s);
     }
 
-    public void printGrid(){
+    private void printGrid(){
         for(int i=0;i<_width;i++){
             // _printRowBorder();
             _printRowPoints(i+1);
