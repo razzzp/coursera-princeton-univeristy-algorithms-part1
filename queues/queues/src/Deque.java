@@ -5,9 +5,9 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Deque <Item> implements Iterable <Item> {
    
-    private Node head;
-    private Node tail;
-    private int size = 0;
+    private Node _head;
+    private Node _tail;
+    private int _size = 0;
 
     private class Node {
         Node next;
@@ -31,7 +31,7 @@ public class Deque <Item> implements Iterable <Item> {
 
     // is the deque empty?
     public boolean isEmpty(){
-        if (head == null && tail == null)
+        if (_head == null && _tail == null)
             return true;
         else
             return false;
@@ -39,7 +39,7 @@ public class Deque <Item> implements Iterable <Item> {
 
     // return the number of items on the deque
     public int size(){
-        return size;
+        return _size;
     }
 
     // add the item to the front
@@ -47,17 +47,17 @@ public class Deque <Item> implements Iterable <Item> {
         if (item == null) throw new IllegalArgumentException("item is null");
 
         if (isEmpty()) {
-            head = new Node(item);
-            tail = head;
+            _head = new Node(item);
+            _tail = _head;
         }
         else {
             // create new node with next pointing to current head
             //  and set as new head
-            Node newNode = new Node(item, head, null);
-            head.prev = newNode;
-            head = newNode;
+            Node newNode = new Node(item, _head, null);
+            _head.prev = newNode;
+            _head = newNode;
         }
-        size++;
+        _size++;
     }
 
     // add the item to the back
@@ -65,29 +65,29 @@ public class Deque <Item> implements Iterable <Item> {
         if (item == null) throw new IllegalArgumentException("item is null");
 
         if (isEmpty()){
-            head = new Node(item);
-            tail = head;
+            _head = new Node(item);
+            _tail = _head;
         } else {
             // add node to tail and set new tail
-            tail.next = new Node(item, null, tail);
-            tail = tail.next;
+            _tail.next = new Node(item, null, _tail);
+            _tail = _tail.next;
         }
-        size++;
+        _size++;
     }
 
     // remove and return the item from the front
     public Item removeFirst(){
         if (isEmpty()) throw new NoSuchElementException("list is empty");
 
-        Item result  = head.item;
-        if (head == tail){
+        Item result  = _head.item;
+        if (_head == _tail){
             // only one item
-            head = null;
-            tail = null;
+            _head = null;
+            _tail = null;
         } else {
             // set new head to next item
-            head = head.next;
-            head.prev = null;
+            _head = _head.next;
+            _head.prev = null;
         }
         return result;
     }
@@ -96,15 +96,15 @@ public class Deque <Item> implements Iterable <Item> {
     public Item removeLast(){
         if (isEmpty()) throw new NoSuchElementException("list is empty");
 
-        Item result  = tail.item;
-        if (head == tail){
+        Item result  = _tail.item;
+        if (_head == _tail){
             // only one item
-            head = null;
-            tail = null;
+            _head = null;
+            _tail = null;
         } else {
             // set new tail to prev
-            tail = tail.prev;
-            tail.next = null;
+            _tail = _tail.prev;
+            _tail.next = null;
         }
         return result;
     }
@@ -115,7 +115,7 @@ public class Deque <Item> implements Iterable <Item> {
     }
 
     private class DequeIterator implements Iterator<Item>{
-        Node current = head;
+        Node current = _head;
 
         @Override
         public boolean hasNext() {
