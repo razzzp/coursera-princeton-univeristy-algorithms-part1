@@ -4,8 +4,10 @@ import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
 
-    private int _trials;
-    private double[] _results;
+    private static final double CONFIDENCE_CONST = 1.96;
+
+    private final int _trials;
+    private final double[] _results;
 
     // perform independent trials on an n-by-n grid
     public PercolationStats(int n, int trials) {
@@ -41,12 +43,12 @@ public class PercolationStats {
 
     // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        return mean() - (1.96*stddev())/(Math.sqrt((double) _trials));
+        return mean() - (CONFIDENCE_CONST*stddev())/(Math.sqrt((double) _trials));
     }
 
     // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        return mean() + (1.96*stddev())/(Math.sqrt((double) _trials));
+        return mean() + (CONFIDENCE_CONST*stddev())/(Math.sqrt((double) _trials));
     }
 
    // test client (see below)

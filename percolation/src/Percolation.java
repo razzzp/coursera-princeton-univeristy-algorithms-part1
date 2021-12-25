@@ -1,25 +1,21 @@
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
-import java.util.Arrays;
-
 public class Percolation {
     
-    private int _width;
-    private int _length;
+    private final int _width;
     private int _openSites = 0;
     private boolean[] _grid;
-    private WeightedQuickUnionUF _myUF;
+    private final WeightedQuickUnionUF _myUF;
 
     // creates n-by-n grid, with all sites initially blocked
     public Percolation(int n) {
         if (n <=0)
             throw new IllegalArgumentException("invalid width");
         _width = n;
-        _length = n*n;
-        // whole grid initally blocked
+        int _length = n*n;
+        //
         _grid = new boolean[_length];
-        Arrays.fill(_grid, false);
         //
         // create UF structure, add 2 extra points for virtual top & bottom points
         _myUF = new WeightedQuickUnionUF(_length);
@@ -33,9 +29,16 @@ public class Percolation {
         }
     }
 
+    private boolean _isValidPoint(int row, int col){
+        if (row <= 0 || row > _width || col <= 0 || col > _width)
+            return false;
+        else
+            return true;
+    }
+
     // throws exception if coords not valid
     private void _validate(int row, int col){
-        if (row <= 0 || row > _width || col <= 0 || col > _width)
+        if (!_isValidPoint(row, col))
             throw new IllegalArgumentException("index out of range");
     }
 
@@ -79,28 +82,15 @@ public class Percolation {
         // union coresponding point in UF
         //  with top, right, bottom, left point
         //  if they are open
-        //
         // top
-        try {
-            if (isOpen(row-1, col)) _myUF.union(_calculateIndex(row, col), _calculateIndex(row-1, col));    
-        }
-        catch(Exception e){}
+        if (_isValidPoint(row-1, col) && isOpen(row-1, col)) _myUF.union(_calculateIndex(row, col), _calculateIndex(row-1, col));    
         // right
-        try {
-            if (isOpen(row, col+1)) _myUF.union(_calculateIndex(row, col), _calculateIndex(row, col+1));
-        }
-        catch(Exception e){}    
+        if (_isValidPoint(row, col+1) && isOpen(row, col+1)) _myUF.union(_calculateIndex(row, col), _calculateIndex(row, col+1));
         // bottom
-        try {
-            if (isOpen(row+1, col)) _myUF.union(_calculateIndex(row, col), _calculateIndex(row+1, col));    
-        }
-        catch(Exception e){}
+        if (_isValidPoint(row+1, col) && isOpen(row+1, col)) _myUF.union(_calculateIndex(row, col), _calculateIndex(row+1, col));    
         // left
-        try {
-            if (isOpen(row, col-1)) _myUF.union(_calculateIndex(row, col), _calculateIndex(row, col-1));    
-        }
-        catch(Exception e){}
-        //
+        if (_isValidPoint(row, col-1) && isOpen(row, col-1)) _myUF.union(_calculateIndex(row, col), _calculateIndex(row, col-1));    
+
         // StdOut.printf("Number of sets: %d\n", _uf.count());
     }
 
@@ -111,7 +101,8 @@ public class Percolation {
 
     // is the site (row, col) full?
     public boolean isFull(int row, int col) {
-        return _myUF.find(_calculateIndex(row, col)) == _myUF.find(0);
+        // check is open to treat first and last row
+        return isOpen(row, col) && _myUF.find(_calculateIndex(row, col)) == _myUF.find(0);
     }
 
     // returns the number of open sites
@@ -121,18 +112,17 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates(){
-        // last point is connected to the whole
-        //  of the bottom row.
-        return isFull(_width, _width);
+        // just check last node, because entire bottom row is connected
+        return _myUF.find(_calculateIndex(_width, _width)) == _myUF.find(0);
     }
 
     // test client (optional)
     public static void main(String[] args) {
         Percolation p = new Percolation(5);
         p.printGrid();
+        p.open(3, 3);
         p.open(1, 1);
         p.open(1, 2);
-        p.open(3, 3);
         p.open(2, 3);
         p.open(3, 4);
         p.open(4, 3);
