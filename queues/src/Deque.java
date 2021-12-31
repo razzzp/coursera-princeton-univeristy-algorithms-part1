@@ -89,6 +89,7 @@ public class Deque <Item> implements Iterable <Item> {
             _head = _head.next;
             _head.prev = null;
         }
+        _size--;
         return result;
     }
 
@@ -106,6 +107,7 @@ public class Deque <Item> implements Iterable <Item> {
             _tail = _tail.prev;
             _tail.next = null;
         }
+        _size--;
         return result;
     }
 

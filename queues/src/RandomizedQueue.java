@@ -30,6 +30,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private void _resize(int newSize){
         int idxInCopy=0;
         Item[] copy = (Item[]) new Object[newSize];
+        // ensure array copy is contiguous
         for (int i=0;i<_arraySize;i++){
             if (_itemArray[i]!=null) copy[idxInCopy++] = _itemArray[i];
         }
@@ -51,7 +52,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     public Item dequeue(){
         if (isEmpty()) throw new NoSuchElementException("list is empty");
 
-        // how bad is this? 1/4 chance elem is nil
+        // how bad is this? at worst 1/4 chance elem is not nil, O(constant)?
         Item result = null;
         int rnd = 0;
         while (result == null){
@@ -70,28 +71,33 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     public Item sample(){
         if (isEmpty()) throw new NoSuchElementException("list is empty");
 
-        int rnd = StdRandom.uniform(_tail);
-        return _itemArray[rnd];
+        Item result = null;
+        while (result == null){
+            int rnd = StdRandom.uniform(_arraySize);
+            result = _itemArray[rnd];
+        }
+        return result;
     }
 
     // return an independent iterator over items in random order
     public Iterator<Item> iterator(){
         _resize(_arraySize);
-        return new RandomizedQueueIterator(_itemCount);
+        return new RandomizedQueueIterator();
     }
 
     private class RandomizedQueueIterator implements Iterator<Item>{
         int[] _indexOrder;
         int _curIndex = 0;
-        final int _iterCount;
+        final int _iterSize;
 
-        RandomizedQueueIterator(int itemCount){
-            _iterCount = itemCount;
+        RandomizedQueueIterator(){
             // resize so list compacts o(n)
             _resize(_arraySize);
             // generate list with index order o(n)
-            _indexOrder = new int[_iterCount];
-            for (int i =0; i< _iterCount;i++){
+            // use iter size in case collection modified
+            _iterSize = _itemCount;
+            _indexOrder = new int[_iterSize];
+            for (int i =0; i< _iterSize;i++){
                 _indexOrder[i] = i;
             }
             StdRandom.shuffle(_indexOrder);
@@ -99,7 +105,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
         @Override
         public boolean hasNext() {
-            return _curIndex < _iterCount;
+            return _curIndex < _iterSize;
         }
 
         @Override
