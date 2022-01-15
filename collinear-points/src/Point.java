@@ -11,6 +11,7 @@
 import java.util.Comparator;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.StdRandom;
 
 public class Point implements Comparable<Point> {
 
@@ -80,7 +81,7 @@ public class Point implements Comparable<Point> {
      */
     public int compareTo(Point that) {
         int xdiff = this.x - that.x;
-        int ydiff = this.y - that.x;
+        int ydiff = this.y - that.y;
 
         if (ydiff == 0) return xdiff;
         else return ydiff;
@@ -98,13 +99,13 @@ public class Point implements Comparable<Point> {
      * @return the Comparator that defines this ordering on points
      */
     public Comparator<Point> slopeOrder() {
-        return new PointComparator(this);
+        return new PointSlopeComparator(this);
     }
 
-    private class PointComparator implements Comparator<Point>{
+    private class PointSlopeComparator implements Comparator<Point>{
         Point refPoint;
 
-        public PointComparator(Point p) {
+        public PointSlopeComparator(Point p) {
             refPoint = p;
         }
 
@@ -133,21 +134,12 @@ public class Point implements Comparable<Point> {
         return "(" + x + ", " + y + ")";
     }
 
-    private static Point[] _makeSquarePoints(int width) {
-        Point[] result = new Point[4];
-        result[0] = new Point(width, width);
-        result[1] = new Point(-width, width);
-        result[2] = new Point(-width, -width);
-        result[3] = new Point(width, -width);
-        return result;
-    }
-
     /**
      * Unit tests the Point data type.
      */
     public static void main(String[] args) {
         final Point p0 = new Point(0, 0);
-        Point[] squarePoints1 = _makeSquarePoints(1);
+        Point[] randomPoints50 = _makeRandonPoints(10, 20);
         Point[] squarePoints10 = _makeSquarePoints(10);
         Comparator<Point> p0Comparator = p0.slopeOrder();
 
@@ -161,13 +153,13 @@ public class Point implements Comparable<Point> {
         StdOut.println("degenerate slope:");
         StdOut.println(squarePoints10[3].toString() + squarePoints10[3].toString() + " = " + squarePoints10[3].slopeTo(squarePoints10[3]));
 
-        StdOut.println("origin slopes 1:");
-        for (Point point : squarePoints1) {    
+        StdOut.println("origin to square 10 slopes:");
+        for (Point point : squarePoints10) {    
             StdOut.println(point.toString() + " = " + p0.slopeTo(point));
         }
 
-        StdOut.println("origin slopes 10:");
-        for (Point point : squarePoints10) {    
+        StdOut.println("origin to random slopes:");
+        for (Point point : randomPoints50) {    
             StdOut.println(point.toString() + " = " + p0.slopeTo(point));
         }
 
@@ -190,5 +182,21 @@ public class Point implements Comparable<Point> {
 
         StdOut.println("compare equal int slope:");
         StdOut.println(squarePoints10[0].toString() + squarePoints10[2].toString() + " = " + p0Comparator.compare(squarePoints10[0], squarePoints10[2]));
+    }
+
+    private static Point[] _makeSquarePoints(int width) {
+        Point[] result = new Point[4];
+        result[0] = new Point(width, width);
+        result[1] = new Point(-width, width);
+        result[2] = new Point(-width, -width);
+        result[3] = new Point(width, -width);
+        return result;
+    }
+    private static Point[] _makeRandonPoints(int number, int maxXY) {
+        Point[] result = new Point[number];
+        for(int i =0; i<number;i++){
+            result[i] = new Point(StdRandom.uniform(maxXY), StdRandom.uniform(maxXY));
+        }
+        return result;
     }
 }
