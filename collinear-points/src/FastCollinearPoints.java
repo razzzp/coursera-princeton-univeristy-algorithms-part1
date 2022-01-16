@@ -1,40 +1,84 @@
 import java.util.Arrays;
 
+import javax.lang.model.util.ElementScanner14;
+
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
 
-public class BruteCollinearPoints {
+public class FastCollinearPoints {
+
     private final LineSegment[] _segments;
     private int _numberOfSegments;
 
-    // finds all line segments containing 4 points
-    public BruteCollinearPoints(Point[] points) {
-
+    // finds all line segments containing 4 or more points
+    public FastCollinearPoints(Point[] points){
         // check null, null points and duplicate points, sorts array
         _checkPoints(points);
 
         // segments
         _segments = new LineSegment[points.length];
-        double slope1,slope2,slope3;
+        
+        for (int i = 0; i < points.length; i++){
+            Point refPoint = points[i];
 
-        for (int i = 0; i < points.length-3; i++){
-            for (int j = i+1; j < points.length-2; j++){
-                for (int k = j+1; k < points.length-1; k++){
-                    for (int l = k+1; l < points.length; l++){
-                        slope1 = points[i].slopeTo(points[j]);
-                        slope2 = points[i].slopeTo(points[k]);
-                        slope3 = points[i].slopeTo(points[l]);
-                        
-                        if (slope1 == slope2 && slope1 == slope3){
-                            // not needed anymore cause array is already sorted
-                            // _segments[_numberOfSegments++] = new LineSegment(_minYPoint(curPoints), _maxYPoint(curPoints));
-                            _segments[_numberOfSegments++] = new LineSegment(points[i], points[l]);
-                        }
-                    }   
-                }   
+            // array for sorting other points, by slope
+            Point[] auxPoints = new Point[points.length];
+
+            // O(n)
+            // TODO: do we need to check with previous points?
+            for(int j=0; j<points.length; j++){
+                // if (j != i) 
+                auxPoints[j] = points[j];
             }   
-        }   
+
+            // order by slope to elem in outer loop
+            // O(nlog n)
+            Arrays.sort(auxPoints, refPoint.slopeOrder());
+
+            // check for 3 or more equal slopes, to get line with 4 or more points
+            int equalSlopeAccum = 0;
+            double prevSlope = Double.NaN;
+            int startPointIndex = 0;
+            // O(n)
+            for (int j=0;j<auxPoints.length;j++){
+                double curSlope = refPoint.slopeTo(auxPoints[j]);
+
+                if (curSlope == prevSlope){
+                    // set start of line, sort is stable so, it should be sorted first
+                    //  by slope order and then by normal compareTo
+                    //  so prev point is lowest point on line
+                    if (equalSlopeAccum == 0) startPointIndex = j-1;
+                    // if equal accumulate and continue
+                    equalSlopeAccum++;
+                }
+                else {
+                    if (equalSlopeAccum >= 3){
+                        // if current slope different that prev
+                        //  and has been the same for 3 or more points
+                        //  create line segment, from lowest point to highest
+                        
+
+                        // lowest can either be refPoint or point at startindex
+                        Point lowestPointInLine;
+                        if (refPoint.compareTo(auxPoints[startPointIndex]) < 0) lowestPointInLine = refPoint;
+                        else lowestPointInLine = auxPoints[startPointIndex];
+
+                        // highest pointin line can either be ref point or
+                        //  elem at j-1 
+                        Point highestPointInLine;
+                        if (refPoint.compareTo(auxPoints[j-1]) > 0) highestPointInLine = refPoint;
+                        else highestPointInLine = auxPoints[j-1];
+
+                        _segments[_numberOfSegments++] = new LineSegment(lowestPointInLine, highestPointInLine);
+                    }
+                    // reset accumulator
+                    equalSlopeAccum=0;
+                }
+                // prepare next loop
+                prevSlope = curSlope;
+            }
+        }
     }
 
     private void _checkPoints(Point[] points){
@@ -64,8 +108,8 @@ public class BruteCollinearPoints {
         }
         return maxYPoint;
     }
-
-    // the number of line segments
+    
+     // the number of line segments
     public int numberOfSegments() {
         return _numberOfSegments;
     }
@@ -81,6 +125,7 @@ public class BruteCollinearPoints {
     private static final int YSCALE_MAX = -50;
     private static final int WIDTH = 100;
     private static final int HEIGHT = 100;
+    private static double penWidth = 0.01;
 
     public static void main(String[] args) {
         _initDraw();
@@ -103,19 +148,23 @@ public class BruteCollinearPoints {
 
     private static void _testCollinear(){
         Point[] points = new Point[100];
-        _makeStraightLine(points, 0, -10, 4, 0, 4);
-        _makeStraightLine(points, 4, -10, 1, 4, 4);
+        _makeStraightLine(points, 0, -10, 4, 0, 10);
+        _makeStraightLine(points, 10, -10, 1, 4, 10);
         // _addRandomPoints(points, 4, XSCALE_MIN, XSCALE_MAX);
-        _addUniqueRandomPoints(points, 8, XSCALE_MIN, XSCALE_MAX);
+        _addUniqueRandomPoints(points, 20, XSCALE_MIN, XSCALE_MAX);
         // StdRandom.shuffle(points);
         
-        BruteCollinearPoints bcp = new BruteCollinearPoints(points);
-        StdOut.println("total segments: " + bcp.numberOfSegments());
+        FastCollinearPoints fcp = new FastCollinearPoints(points);
+        StdOut.println("total segments: " + fcp.numberOfSegments());
 
         // draw lines
         StdDraw.setPenColor(StdDraw.BLUE);
-        for(LineSegment ls : bcp.segments()){
+        int r = 0, g = 100, b = 0;
+        for(LineSegment ls : fcp.segments()){
             StdOut.println(ls);
+            StdDraw.setPenColor(r, g, b);
+            b += 20;
+            if (b>255) b= 0;
             if (ls!= null) ls.draw();
         }
 
@@ -142,7 +191,7 @@ public class BruteCollinearPoints {
             inArray[startIndex+i] = new Point(StdRandom.uniform(min,max),StdRandom.uniform(min, max));
         }  
     }
-    
+
     private static void _addUniqueRandomPoints(Point[] inArray, int startIndex, int min, int max){
         for(int i=0;i<inArray.length-startIndex;i++){
             Point newPoint;
@@ -154,7 +203,6 @@ public class BruteCollinearPoints {
         }  
     }
 
-
     private static boolean _pointExists(Point refPoint, Point[] inArray){
         for(Point p : inArray){
             if (p == null) continue;
@@ -162,4 +210,4 @@ public class BruteCollinearPoints {
         }
         return false;
     }
-}
+ }
