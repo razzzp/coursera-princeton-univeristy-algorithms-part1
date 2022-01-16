@@ -15,16 +15,10 @@ public class Client {
         }
     
         // draw the points
-        // StdDraw.enableDoubleBuffering();
-        StdDraw.setScale(0, 32768);
-        // StdDraw.setXscale(0, 32768);
-        // StdDraw.setYscale(0, 32768);
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 32768);
+        StdDraw.setYscale(0, 32768);
         StdDraw.setPenRadius(0.003);
-        StdDraw.setPenColor(StdDraw.RED);
-        for (Point p : points) {
-            p.draw();
-        }
-        StdDraw.show();
     
         // print and draw the line segments
         FastCollinearPoints collinear = new FastCollinearPoints(points);
@@ -33,6 +27,13 @@ public class Client {
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
             if (segment != null) segment.draw();
+        }
+        StdDraw.show();
+
+        StdDraw.setPenRadius(0.005);
+        StdDraw.setPenColor(StdDraw.RED);
+        for (Point p : points) {
+            p.draw();
         }
         StdDraw.show();
     }

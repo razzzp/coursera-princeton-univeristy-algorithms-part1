@@ -7,7 +7,7 @@ import edu.princeton.cs.algs4.StdRandom;
 public class BruteCollinearPoints {
     private LineSegment[] _segments;
     private int _numberOfSegments =0;
-    private int _segArraySize = 4;
+    private int _segArraySize = 1;
 
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points) {
@@ -35,7 +35,10 @@ public class BruteCollinearPoints {
                     }   
                 }   
             }   
-        }   
+        }
+        
+        // clean up segments array
+        _segments = Arrays.copyOfRange(_segments, 0, _numberOfSegments);
     }
 
     private void _checkPoints(Point[] points){
@@ -43,8 +46,8 @@ public class BruteCollinearPoints {
         // sort to check for dupes
         Arrays.sort(points);
         for(int i = 1;i < points.length; i++){
-            if (points[i].compareTo(points[i-1]) == 0) throw new IllegalArgumentException("duplicate points found");
             if (points[i] == null || points[i-1] == null) throw new IllegalArgumentException("points contain a null point");
+            if (points[i].compareTo(points[i-1]) == 0) throw new IllegalArgumentException("duplicate points found");
         }
     }
 
@@ -59,24 +62,6 @@ public class BruteCollinearPoints {
             _segments = newArr;
         }
         _segments[_numberOfSegments++] = new LineSegment(p1, p2);
-    }
-
-    private Point _minYPoint(Point[] points){
-        Point minYPoint = points[0];
-        for (Point point : points) {
-            if(point.compareTo(minYPoint) < 0)
-                minYPoint = point;
-        }
-        return minYPoint;
-    }
-
-    private Point _maxYPoint(Point[] points){
-        Point maxYPoint = points[0];
-        for (Point point : points) {
-            if(point.compareTo(maxYPoint) > 0)
-                maxYPoint = point;
-        }
-        return maxYPoint;
     }
 
     // the number of line segments

@@ -8,40 +8,45 @@ public class FastCollinearPoints {
 
     private LineSegment[] _segments;
     private int _numberOfSegments = 0;
-    private int _segArraySize = 4;
+    private int _segArraySize = 1;
+    private Boolean[] _seenStartPoint;
+    private Boolean[] _seenEndPoint;
 
     // finds all line segments containing 4 or more points
     public FastCollinearPoints(Point[] points){
-        // check null, null points and duplicate points, sorts array
+        // check null array, null points and duplicate points, sorts array
         _checkPoints(points);
         // segments
         _segments = new LineSegment[_segArraySize];
+        // to prevent dupes
+        _seenStartPoint = new Boolean[points.length];
+        _seenEndPoint = new Boolean[points.length];
+        Arrays.fill(_seenStartPoint, false);
+        Arrays.fill(_seenEndPoint, false);
 
         if(points.length < 4) return;
         
         for (int i = 0; i < points.length; i++){
             Point refPoint = points[i];
 
-            // array for sorting other points, by slope
-             // TODO: do we need to check with previous points?
-            Point[] auxPoints = _copyArray(points);
-
+            Point[] auxPoints = Arrays.copyOfRange(points, 0, points.length);
             // order by slope to elem in outer loop
             // O(nlog n)
             Arrays.sort(auxPoints, refPoint.slopeOrder());
 
-            // for debug
-            Double[] slopeArray = new Double[points.length];
-            for(int j=0;j<auxPoints.length; j++){
-                slopeArray[j] = refPoint.slopeTo(auxPoints[j]);
-            }
+            // // for debug
+            // Double[] slopeArray = new Double[points.length];
+            // for(int j=0;j<auxPoints.length; j++){
+            //     slopeArray[j] = refPoint.slopeTo(auxPoints[j]);
+            // }
 
             // check for 3 or more equal slopes, to get line with 4 or more points
             int equalSlopeAccum = 1;
             double prevSlope = Double.NaN;
             int startPointIndex = 0;
             // O(n)
-            for (int j=0;j<auxPoints.length;j++){
+            // start at 1 because 1st point is always self
+            for (int j=1;j<auxPoints.length;j++){
                 double curSlope = refPoint.slopeTo(auxPoints[j]);
 
                 if (curSlope == prevSlope){
@@ -59,7 +64,6 @@ public class FastCollinearPoints {
                         //  and has been the same for 3 or more points
                         //  create line segment, from lowest point to highest
                         
-
                         // lowest can either be refPoint or point at startindex
                         Point lowestPointInLine;
                         if (refPoint.compareTo(auxPoints[startPointIndex]) < 0) lowestPointInLine = refPoint;
@@ -68,11 +72,23 @@ public class FastCollinearPoints {
                         // highest pointin line can either be ref point or
                         //  elem at j-1 
                         Point highestPointInLine;
-                        int endPointIndex = (j == auxPoints.length-1) ? j : j-1;
+                        // second part is too make sure to use j only if
+                        //  j and j-1 are the same
+                        int endPointIndex = (j == auxPoints.length-1 && prevSlope == curSlope) ? j : j-1;
                         if (refPoint.compareTo(auxPoints[endPointIndex]) > 0) highestPointInLine = refPoint;
                         else highestPointInLine = auxPoints[endPointIndex];
 
-                        _addSegment(lowestPointInLine, highestPointInLine);
+                        // binary search point in original array to get indexes
+                        // O(log n)
+                        int startIndex = Arrays.binarySearch(points, lowestPointInLine);
+                        int endIndex = Arrays.binarySearch(points, highestPointInLine);
+
+                        // check if seen before
+                        if (!(_seenStartPoint[startIndex] && _seenEndPoint[endIndex])){
+                            _addSegment(lowestPointInLine, highestPointInLine);    
+                            _seenStartPoint[startIndex] = true;
+                            _seenEndPoint[endIndex]= true;
+                        }
                     }
                     // reset accumulator
                     equalSlopeAccum=1;
@@ -81,6 +97,9 @@ public class FastCollinearPoints {
                 prevSlope = curSlope;
             }
         }
+
+        // clean up segments array
+        _segments = Arrays.copyOfRange(_segments, 0, _numberOfSegments);
     }
 
     private void _checkPoints(Point[] points){
@@ -88,8 +107,8 @@ public class FastCollinearPoints {
         // sort to check for dupes
         Arrays.sort(points);
         for(int i = 1;i < points.length; i++){
-            if (points[i].compareTo(points[i-1]) == 0) throw new IllegalArgumentException("duplicate points found");
             if (points[i] == null || points[i-1] == null) throw new IllegalArgumentException("points contain a null point");
+            if (points[i].compareTo(points[i-1]) == 0) throw new IllegalArgumentException("duplicate points found");
         }
     }
 
@@ -104,36 +123,7 @@ public class FastCollinearPoints {
             _segments = newArr;
         }
         _segments[_numberOfSegments++] = new LineSegment(p1, p2);
-        _segments[_numberOfSegments-1].draw();
-    }
-
-    private Point[] _copyArray(Point[] points){
-        Point[] auxPoints = new Point[points.length];
-
-        // O(n)
-        for(int j=0; j< points.length; j++){
-            // if (j != i) 
-            auxPoints[j] = points[j];
-        }
-        return auxPoints;
-    }
-
-    private Point _minYPoint(Point[] points){
-        Point minYPoint = points[0];
-        for (Point point : points) {
-            if(point.compareTo(minYPoint) < 0)
-                minYPoint = point;
-        }
-        return minYPoint;
-    }
-
-    private Point _maxYPoint(Point[] points){
-        Point maxYPoint = points[0];
-        for (Point point : points) {
-            if(point.compareTo(maxYPoint) > 0)
-                maxYPoint = point;
-        }
-        return maxYPoint;
+        // _segments[_numberOfSegments-1].draw();
     }
     
      // the number of line segments
@@ -200,7 +190,7 @@ public class FastCollinearPoints {
             StdOut.println(p);
             if(p != null) p.draw();
         }
-        StdOut.println("end");
+        // StdOut.println("end");
     }
 
     private static void _makeStraightLine(Point[] inArray, int startIndex, int iX, int gradient, int c, int num){
