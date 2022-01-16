@@ -5,8 +5,9 @@ import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
 
 public class BruteCollinearPoints {
-    private final LineSegment[] _segments;
-    private int _numberOfSegments;
+    private LineSegment[] _segments;
+    private int _numberOfSegments =0;
+    private int _segArraySize = 4;
 
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points) {
@@ -15,7 +16,7 @@ public class BruteCollinearPoints {
         _checkPoints(points);
 
         // segments
-        _segments = new LineSegment[points.length];
+        _segments = new LineSegment[_segArraySize];
         double slope1,slope2,slope3;
 
         for (int i = 0; i < points.length-3; i++){
@@ -29,7 +30,7 @@ public class BruteCollinearPoints {
                         if (slope1 == slope2 && slope1 == slope3){
                             // not needed anymore cause array is already sorted
                             // _segments[_numberOfSegments++] = new LineSegment(_minYPoint(curPoints), _maxYPoint(curPoints));
-                            _segments[_numberOfSegments++] = new LineSegment(points[i], points[l]);
+                            _addSegment(points[i], points[l]);
                         }
                     }   
                 }   
@@ -45,6 +46,19 @@ public class BruteCollinearPoints {
             if (points[i].compareTo(points[i-1]) == 0) throw new IllegalArgumentException("duplicate points found");
             if (points[i] == null || points[i-1] == null) throw new IllegalArgumentException("points contain a null point");
         }
+    }
+
+    private void _addSegment(Point p1, Point p2){
+        if (_numberOfSegments == _segArraySize){
+            // resize
+            _segArraySize *= 2;
+            LineSegment[] newArr = new LineSegment[_segArraySize];
+            for (int i = 0; i<_segments.length;i++){
+                newArr[i] = _segments[i];
+            }
+            _segments = newArr;
+        }
+        _segments[_numberOfSegments++] = new LineSegment(p1, p2);
     }
 
     private Point _minYPoint(Point[] points){
@@ -91,7 +105,6 @@ public class BruteCollinearPoints {
     private static void _initDraw() {
         StdDraw.setPenRadius(0.005);
         StdDraw.setScale(XSCALE_MIN, XSCALE_MAX);
-        StdDraw.point(45, -45);
         StdDraw.setPenColor(StdDraw.BLACK);
         // x axis
         StdDraw.line(-50, 0, 50, 0);
