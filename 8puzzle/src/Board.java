@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.StdRandom;
+
 public class Board {
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
@@ -78,7 +82,7 @@ public class Board {
     }
 
     // number of tiles out of place
-    public int calculateHamming(){
+    private int calculateHamming(){
         int diffCount = 0;
         // skip last index
         for(int i=0;i<n*n-1;i++){
@@ -99,7 +103,7 @@ public class Board {
     }
 
     // sum of Manhattan distances between tiles and goal
-    public int calculateManhattan(){
+    private int calculateManhattan(){
         int result = 0;
         // all 0-based index
         int curRow, curColumn, curGoalRow, curGoalColumn, curValue;
@@ -126,7 +130,8 @@ public class Board {
     public boolean equals(Object y){
         // is this ok? can't access y tiles to compare, zz
         if (y== null) return false;
-        return this.toString() == y.toString();
+        return (y instanceof Board)
+         && (this.toString().equals(y.toString()));
     }
 
     private int getEmptySlotIndex(){
@@ -192,11 +197,12 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin(){
-        // 0 is not a tile
-        int rIdx1 = StdRandom.uniform(n*n-1);
-        while(tiles[rIdx1] == 0) rIdx1 = StdRandom.uniform(n*n-1);
-        int rIdx2 = StdRandom.uniform(n*n-1);
-        while (rIdx2 == rIdx1 || tiles[rIdx2] == 0 ) rIdx2 = StdRandom.uniform(n*n-1);
+        // need to be consistent
+        // don't use random, get first 2 non-0 tiles
+        int rIdx1 = 0;
+        while(tiles[rIdx1] == 0) rIdx1++;
+        int rIdx2 = 0;
+        while (rIdx2 <= rIdx1 || tiles[rIdx2] == 0 ) rIdx2++;
 
         return new Board(this, rIdx1, rIdx2);
     }
@@ -242,6 +248,7 @@ public class Board {
         int n = 3;
         int[][] tiles = generateRandomTiles(n);
         int[][] tilesTestManhattan = {{6,2,7},{8,5,1},{4,3,0}};
+        int[][] tiles2 = {{3,2},{1,0}};
 
         Board board;
 
@@ -269,5 +276,20 @@ public class Board {
         // test manhattan
         StdOut.printf("manhattan: %d\n", goalBoard.manhattan()); 
         printNeighbours(goalBoard);
+
+        board = new Board(tiles2);
+        Board board2 = new Board(tiles2);
+        StdOut.println(board.equals(board2));
+
+        tiles = generateRandomTiles(n);
+        board = new Board(tiles);
+        // test twin
+        StdOut.println("test twin");
+        StdOut.println(board);
+        for(int i=0;i<10;i++){
+            StdOut.printf("iter %d\n", i);
+            Board twinBoard = board.twin();
+            StdOut.print(twinBoard);
+        }
     }
 }

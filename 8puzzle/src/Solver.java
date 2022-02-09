@@ -1,9 +1,11 @@
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.MinPQ;
 
 public class Solver {
@@ -111,14 +113,16 @@ public class Solver {
 
     // test client (see below) 
     public static void main(String[] args){
-        // unsolveable
-        //int[][] tilesTestManhattan = {{0,3,1},{4,2,5},{7,8,6}};
         // solveable
-        //int[][] tilesTestManhattan = {{6,2,7},{8,5,1},{4,3,0}};
+        // int[][] tilesTestManhattan = {{0,1,3},{4,2,5},{7,8,6}};
         // unsolveable
-        //int[][] tilesTestManhattan = {{6,3,7},{8,5,1},{4,2,0}};
+        int[][] tilesTestManhattan = {{0,3,1},{4,2,5},{7,8,6}};
+        // solveable
+        // int[][] tilesTestManhattan = {{6,2,7},{8,5,1},{4,3,0}};
+        // unsolveable
+        // int[][] tilesTestManhattan = {{6,3,7},{8,5,1},{4,2,0}};
         // solved
-        int[][] tilesTestManhattan = {{1,2,3},{4,5,6},{7,8,0}};
+        //int[][] tilesTestManhattan = {{1,2,3},{4,5,6},{7,8,0}};
 
         Board board;
 
